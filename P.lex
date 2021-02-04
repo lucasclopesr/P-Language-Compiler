@@ -1,36 +1,40 @@
 %{
 #include <stdio.h>
+#include "grammar.h"
 %}
 
 %%
 
-(if) printf("IF");
-(then) printf("THEN");
-(else) printf("ELSE");
-(begin) printf("BEGIN");
-(end) printf("END");
-(do) printf("DO");
-(while) printf("WHILE");
-(until) printf("UNTIL");
-(read) printf("READ");
-(write) printf("WRITE");
-(goto) printf("GOTO");
-(NOT) printf("NOT");
-(integer) printf("INTEGER_TYPE");
-(real) printf("REAL_TYPE");
-(boolean) printf("BOOL_TYPE");
-(char) printf("CHAR_TYPE");
-(program) printf("PROGRAM");
+(if) return IF_TOKEN;
+(then) return THEN_TOKEN;
+(else) return ELSE_TOKEN;
+(begin) return BEGIN_TOKEN;
+(end) return END_TOKEN;
+(do) return DO_TOKEN;
+(while) return WHILE_TOKEN;
+(until) return UNTIL_TOKEN;
+(read) return READ_TOKEN;
+(write) return WRITE_TOKEN;
+(goto) return GOTO_TOKEN;
+(NOT) return NOT_TOKEN;
+(integer) return INTEGER_TYPE;
+(real) return REAL_TYPE;
+(boolean) return BOOL_TYPE;
+(char) return CHAR_TYPE;
+(program) return PROGRAM;
 
-(\+|-|or) printf("ADDOP");
-(\*|\/|div|mod|and) printf("MULOP");
-(sin|cos|log|ord|chr|abs|sqrt|exp|eof|eoln) printf("FUNC");
-(false|true) printf("BOOL_CONST");
-[a-zA-Z]([a-zA-Z]|[0-9])* printf("IDENTIFIER");
-[0-9][0-9]* printf("INTEGER_CONST");
-[0-9][0-9]*(\.[0-9]+)?(E(\+|-)[0-9]+)? printf("REAL_CONST");
-\'.\' printf("CHAR_CONST");
-(<=|>=|<>|=|<|>) printf("RELOP");
+(\+|-|or) return ADDOP;
+(\*|\/|div|mod|and) return MULOP;
+(sin|cos|log|ord|chr|abs|sqrt|exp|eof|eoln) return FUNC;
+(false|true) return BOOL_CONST;
+[a-zA-Z]([a-zA-Z]|[0-9])* return IDENTIFIER;
+[0-9][0-9]* return INTEGER_CONST;
+[0-9][0-9]*(\.[0-9]+)?(E(\+|-)[0-9]+)? return REAL_CONST;
+\'.\' return CHAR_CONST;
+(<=|>=|<>|=|<|>) return RELOP;
+; ;
+[ \t\n] ;
+. return UNKNOWN;
 
 %%
 
