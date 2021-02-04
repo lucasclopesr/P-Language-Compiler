@@ -25,3 +25,9 @@
 #define ELSE_TOKEN 24
 #define THEN_TOKEN 25
 #define IF_TOKEN 26
+#define SEMICOLON 27
+#define COLON 28
+#define COMMA 29
+#define ASSIGN 30
+#define OPEN_P 31
+#define CLOSE_P 32

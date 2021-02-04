@@ -32,7 +32,12 @@
 [0-9][0-9]*(\.[0-9]+)?(E(\+|-)[0-9]+)? printf("%d\n",REAL_CONST);
 \'.\' printf("%d\n",CHAR_CONST);
 (<=|>=|<>|=|<|>) printf("%d\n",RELOP);
-; ;
+(;|[ ];) printf("%d\n",SEMICOLON);
+: printf("%d\n",COLON);
+(,|[ ],) printf("%d\n",COMMA);
+(:=|[ ]:=) printf("%d\n",ASSIGN);
+[(] printf("%d\n",OPEN_P);
+[)] printf("%d\n",CLOSE_P);
 [ \t\n] ;
 . printf("%d\n", UNKNOWN);
 

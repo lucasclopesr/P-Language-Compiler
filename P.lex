@@ -32,7 +32,12 @@
 [0-9][0-9]*(\.[0-9]+)?(E(\+|-)[0-9]+)? return REAL_CONST;
 \'.\' return CHAR_CONST;
 (<=|>=|<>|=|<|>) return RELOP;
-; ;
+(;|[ ];) return SEMICOLON;
+: return COLON;
+(,|[ ],) return COMMA;
+(:=|[ ]:=) return ASSIGN;
+[(] return OPEN_P;
+[)] return CLOSE_P;
 [ \t\n] ;
 . return UNKNOWN;
 
