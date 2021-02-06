@@ -1,13 +1,3 @@
-# Trabalho Prático 3 - Analisador Léxico
-
-### Alunos:
-
-- Lucas Caetano Lopes Rodrigues, matrícula: 2016006670
-
-- Lucas Starling de Paula Salles, matrícula: 2016006697
-
-
-
 ## Implementação do Analisador Léxico
 
 Para implementação da etapa de análise léxica, utilizamos a ferramenta `flex` do `POSIX`. Essa ferramente recebe como entrada um arquivo `.lex` e retorna como saída um arquivo `lex.yy.c` contendo a implementação do analisador léxico na linguagem C.
