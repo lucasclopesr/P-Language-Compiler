@@ -1,4 +1,4 @@
 rm ./lex.yy.c
 rm ./outputs/hello
-flex P.lex
+flex Yylex.lex
 gcc -o outputs/hello lex.yy.c -lfl
