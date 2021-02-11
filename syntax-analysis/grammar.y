@@ -62,17 +62,17 @@ expr:                       simple_expr , expr
 simple_expr:                term
                             | simpleexpr   ADDOP   term
                             ;
-term:                       factora
-                            | term   MULOP   factora
+term:                       factor_a
+                            | term   MULOP   factor_a
                             ;
-fatora:                     factor
+factor_a:                   - factor /* factora != fatora */
                             | factor
                             ;
 factor:                     identifier
                             | constant
                             | ( expr )
                             | function_ref
-                            |NOT   factor
+                            | NOT   factor
                             ;
 function_ref:                identifier
                             | function_ref_par

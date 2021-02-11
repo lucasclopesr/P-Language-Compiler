@@ -28,8 +28,7 @@
 (sin|cos|log|ord|chr|abs|sqrt|exp|eof|eoln) printf("FUNC ");
 (false|true) printf("BOOL_CONST ");
 [a-zA-Z]([a-zA-Z]|[0-9])* printf("IDENTIFIER ");
-[0-9][0-9]* printf("INTEGER_CONST ");
-[0-9][0-9]*(\.[0-9]+)?(E(\+|-)[0-9]+)? printf("REAL_CONST ");
+(\+|-)?([0-9][0-9]*|[0-9][0-9]*(\.[0-9]+)?(E(\+|-)[0-9]+)?) printf("CONST ");
 \'.\' printf("CHAR_CONST ");
 (<=|>=|<>|=|<|>) printf("RELOP ");
 (;|[ ];) printf("SEMICOLON ");
