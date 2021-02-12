@@ -1,8 +1,0 @@
-program one;
-id1: integer
-begin
-id1 := 5
-end
-
-
-on 1290 +-  printf("yystate: %d\n", yystate);

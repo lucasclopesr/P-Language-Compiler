@@ -1,18 +1,13 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "lex.yy.c"
  
 void yyerror(const char *str)
 {
         fprintf(stderr,"error: %s\n",str);
 }
- 
-int main()
-{
-        yyparse();
-        return 1;
-} 
 
 %}
 
@@ -124,3 +119,16 @@ boolean_constant:           FALSE_CONST
 
 
 %%
+
+int main(int argc, char *argv[]) {
+        if (argc == 1){
+          yyparse();
+        }
+
+        if (argc == 2) {
+          yyin = fopen(argv[1], "r");
+          yyparse();
+        }
+
+        return 0;
+} 
