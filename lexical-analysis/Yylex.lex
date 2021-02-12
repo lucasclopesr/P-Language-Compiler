@@ -1,6 +1,6 @@
 %{
 #include <stdio.h>
-#include "grammar.h"
+#include "y.tab.h"
 %}
 
 %%
@@ -28,7 +28,7 @@
 (sin|cos|log|ord|chr|abs|sqrt|exp|eof|eoln) return FUNC;
 (false|true) return BOOL_CONST;
 [a-zA-Z]([a-zA-Z]|[0-9])* return IDENTIFIER;
-(\+|-)?([0-9][0-9]*|[0-9][0-9]*(\.[0-9]+)?(E(\+|-)[0-9]+)?) return CONST
+(\+|-)?([0-9][0-9]*|[0-9][0-9]*(\.[0-9]+)?(E(\+|-)[0-9]+)?) return CONST;
 \'.\' return CHAR_CONST;
 (<=|>=|<>|=|<|>) return RELOP;
 (;|[ ];) return SEMICOLON;

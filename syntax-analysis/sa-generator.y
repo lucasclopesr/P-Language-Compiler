@@ -7,11 +7,6 @@ void yyerror(const char *str)
         fprintf(stderr,"error: %s\n",str);
 }
  
-int yywrap()
-{
-        return 1;
-} 
-  
 main()
 {
         yyparse();
@@ -21,7 +16,7 @@ main()
 
 %token PROGRAM
 %token CHAR_TYPE BOOL_TYPE REAL_TYPE INTEGER_TYPE ELSE_TOKEN
-%token CHAR_CONST REAL_CONST INTEGER_CONST BOOL_CONST IDENTIFIER TRUE_CONST FALSE_CONST SIGN
+%token CHAR_CONST CONST  BOOL_CONST IDENTIFIER TRUE_CONST FALSE_CONST SIGN
 %right OPEN_P BEGIN_TOKEN IF_TOKEN NOT_TOKEN WHILE_TOKEN UNTIL_TOKEN
 %left CLOSE_P END_TOKEN THEN_TOKEN
 
@@ -116,8 +111,7 @@ variable:                   simple_variable_or_proc
                             ;
 simple_variable_or_proc:    IDENTIFIER
                             ;
-constant:                   INTEGER_CONST
-                            | REAL_CONST
+constant:                   CONST 
                             | CHAR_CONST
                             | boolean_constant
                             ;
