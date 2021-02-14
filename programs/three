@@ -1,4 +1,4 @@
-program two;
+program three;
 it1,it2,it3,it4,it5: integer
 begin
 it1 := 5;
