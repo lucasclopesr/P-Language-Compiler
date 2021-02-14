@@ -1,0 +1,10 @@
+program two;
+it1,it2,it3,it4: integer;
+fl1: real
+begin
+it1 := 5;
+it2 := 3;
+it3 := 4;
+it4 := 2;
+fl1 := (it1 * it2) / (it3 * it4)
+end

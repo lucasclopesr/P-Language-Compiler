@@ -1,0 +1,9 @@
+program two;
+it1,it2,it3,it4,it5: integer
+begin
+it1 := 5;
+it2 := 3;
+it3 := 4;
+it4 := 2;
+it5 := (it1 * it2) / (it3 * it4)
+end
