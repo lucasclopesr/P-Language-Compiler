@@ -2,8 +2,47 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include "lex.yy.c"
- 
+
+typedef struct node node;
+typedef node *list;
+typedef union node_value node_value;
+
+union node_value {
+    int int_value;
+    float float_value;
+    char char_value;
+};
+
+struct node
+{
+    char *key;
+    node_value data;
+    list next;
+};
+
+typedef struct hashmap *hashmap;
+struct hashmap
+{
+    list *l;
+    int _arr_len;
+};
+
+typedef struct hash_ret hash_ret;
+struct hash_ret
+{
+    char valid;
+    node_value value;
+};
+
+
+hash_ret get(hashmap h, char *key);
+void put(hashmap h, char *key,  node_value data);
+hashmap new_hashmap(int arr_size);
+void hashmap_delete(hashmap h);
+
+hashmap map;
 void yyerror(const char *str)
 {
         fprintf(stderr,"error: %s\n",str);
@@ -121,6 +160,7 @@ boolean_constant:           FALSE_CONST
 %%
 
 int main(int argc, char *argv[]) {
+        map = new_hashmap(100);
         if (argc == 1){
           yyparse();
         }
@@ -131,4 +171,122 @@ int main(int argc, char *argv[]) {
         }
 
         return 0;
-} 
+}
+
+int hash_func(char *key){
+    int ret = 0;
+    for (int i = 0; key[i] != '\0'; i++){
+        ret += key[i];
+    }
+    return ret;
+}
+
+char comp_func(char *k1, char *k2){
+    return !strcmp(k1,k2);
+}
+
+int hash_map_get_index(hashmap h, char *key)
+{
+    return hash_func(key) % h->_arr_len;
+}
+
+list new_list()
+{
+    list item = malloc(sizeof(node));
+    item->next = item->key = 0;
+    return item;
+}
+
+char list_add(hashmap h, list item, char *key, node_value value)
+{
+    if (!item->key)
+    {
+        item->data = value;
+        item->key = key;
+        return 1;
+    }
+    if (comp_func(key, item->key))
+    {
+        item->data = value;
+        return;
+    }
+    if (!item->next){
+        item->next = new_list();
+    }
+
+    return list_add(h, item->next, key, value);
+}
+
+void put(hashmap h,  char *key, node_value value)
+{
+    int index = hash_map_get_index(h, key);
+    list_add(h, h->l[index], key, value);
+}
+void assign(char *key, node_value value){
+  put(map,key,value)
+}
+
+list list_get(hashmap h, list item, char *key)
+{
+
+    if (!item->key)
+    {
+        return 0;
+    }
+    if (comp_func(key, item->key))
+        return item;
+    if (!item->next)
+        return 0;
+
+    return list_get(h, item->next, key);
+}
+
+list hashmap_get_item(hashmap h, char *key){
+    unsigned index = hash_map_get_index(h, key);
+    return list_get(h, h->l[index], key);
+}
+
+hashmap new_hashmap(int arr_size)
+{
+    hashmap h = malloc(sizeof(struct hashmap));
+    h->l = malloc(arr_size * sizeof(list));
+    h->_arr_len = arr_size;
+    for (size_t i = 0; i < arr_size; i++)
+    {
+        h->l[i] = new_list();
+    }
+    return h;
+}
+
+hash_ret get(hashmap h, char *key)
+{
+    hash_ret ret;
+    ret.valid = 0;
+    const list item = hashmap_get_item(h, key);
+    if (item == 0){
+        return ret;
+    }
+    ret.value = item->data;
+    ret.valid = 1;
+    return ret;
+}
+
+void list_delete(list item)
+{
+    if (item->next)
+    {
+        list_delete(item->next);
+    }
+    free(item);
+}
+
+void hashmap_delete(hashmap h)
+{
+    for (size_t i = 0; i < h->_arr_len; i++)
+    {
+        list cur = h->l[i];
+        list_delete(cur);
+    }
+    free(h->l);
+    free(h);
+}
