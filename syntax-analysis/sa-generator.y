@@ -170,7 +170,6 @@ unlabelled_stmt:            assign_stmt { ; }
                             | compound_stmt { ; }
                             ;
 assign_stmt:                IDENTIFIER ASSIGN expr {
-                              printf("here");
                               updateSymbol($1, (node_value) $3);
                             }
                             ;
@@ -211,6 +210,7 @@ expr:                       simple_expr { $$ = $1; }
                             ;
 simple_expr:                term { $$ = $1; }
                             | simple_expr ADDOP term {
+                              printf("ADDOP");
                               if (strcmp($2, "+") == 0){
                                 $$ = $1 + $3;
                               } else if (strcmp($2, "-") == 0) {
@@ -335,6 +335,8 @@ void updateSymbol(char* key, node_value val){
       printf("Memoria cheia!");
     }
   }
+
+  printf("id %d inserted in table with value %d\n", last, val);
 
 }
 

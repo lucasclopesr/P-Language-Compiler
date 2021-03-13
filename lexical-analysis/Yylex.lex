@@ -25,10 +25,11 @@
 (char) { return CHAR_TYPE; }
 (program) { return PROGRAM; }
 
-(\+|-|or) { strcpy(yylval.op, yytext); return ADDOP; }
-(\*|\/|div|mod|and) { strcpy(yylval.op, yytext); return MULOP; }
-(sin|cos|log|ord|chr|abs|sqrt|exp|eof|eoln) { strcpy(yylval.op, yytext); return FUNC; }
+(\+|-|or) { yylval.op = malloc(sizeof(yytext)); strcpy(yylval.op, yytext); return ADDOP; }
+(\*|\/|div|mod|and) { yylval.op = malloc(sizeof(yytext)); strcpy(yylval.op, yytext); return MULOP; }
+(sin|cos|log|ord|chr|abs|sqrt|exp|eof|eoln) { yylval.op = malloc(sizeof(yytext)); strcpy(yylval.op, yytext); return FUNC; }
 (false|true) {
+  yylval.char_val = malloc(sizeof(yytext));
   strcpy(yylval.char_val, yytext);
   if (strcmp(yytext, "false") == 0){
     return FALSE_CONST;
@@ -39,7 +40,7 @@
 [a-zA-Z]([a-zA-Z]|[0-9])* { yylval.id = malloc(sizeof(yytext)); strcpy(yylval.id, yytext); return IDENTIFIER; }
 (\+|-)?([0-9][0-9]*|[0-9][0-9]*(\.[0-9]+)?(E(\+|-)[0-9]+)?) { yylval.num_val = atoi(yytext); return CONST; }
 \'.\' { yylval.char_val = yytext[0]; return CHAR_CONST; }
-(<=|>=|<>|=|<|>) { strcpy(yylval.op, yytext); return RELOP; }
+(<=|>=|<>|=|<|>) { yylval.op = malloc(sizeof(yytext)); strcpy(yylval.op, yytext); return RELOP; }
 (;|[ ];) { return SEMICOLON; }
 : { return COLON; }
 (,|[ ],) { return COMMA; }
