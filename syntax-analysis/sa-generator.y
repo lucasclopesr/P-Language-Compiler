@@ -21,42 +21,13 @@ struct node {
   char key[100];
 };
 
-node symbol_table[100];
+#define SYMBOLS 100
+node symbol_table[SYMBOLS];
 
 void updateSymbol(char* key, node_value);
 node getSymbol(char* key);
 char id_buffer[100][10]; // Variable names are limited to 10 characters
 int buffer_idx = 0;
-
-/*struct node
-{
-    char *key;
-    node_value data;
-    list next;
-};
-
-typedef struct hashmap *hashmap;
-struct hashmap
-{
-    list *l;
-    int _arr_len;
-};
-
-typedef struct hash_ret hash_ret;
-struct hash_ret
-{
-    char valid;
-    node_value value;
-};
-
-
-hash_ret get(hashmap h, char *key);
-void put(hashmap h, char *key,  node_value data);
-hashmap new_hashmap(int arr_size);
-void hashmap_delete(hashmap h);
-
-hashmap map;
-*/
 
 void yyerror(const char *str)
 {
@@ -147,7 +118,7 @@ decl:                       ident_list COLON type {
                               
                               for (i = 0; i < buffer_idx; i++) {
                                 updateSymbolType(id_buffer[i], $3);
-                                printf("In buffer: %s\n", id_buffer[i]);
+                                // printf("In buffer: %s\n", id_buffer[i]);
                               }
                             }
                             ;
@@ -370,7 +341,7 @@ int main(int argc, char *argv[]) {
   }
 
   yyparse();
-
+  print_symbols();
   return 0;
 } 
 
@@ -382,7 +353,7 @@ node getSymbol(char* key) {
   for (i = 0; i < 100; i++){
     
     if (strcmp(symbol_table[i].key, key) == 0){
-      printf("\nSYMBOL FOUND! i = %d\nSymbol val: %d\nSymbol type: %d\n\n", i, symbol_table[i].data, symbol_table[i].type);
+      // printf("\nSYMBOL FOUND! i = %d\nSymbol val: %d\nSymbol type: %d\n\n", i, symbol_table[i].data, symbol_table[i].type);
       return symbol_table[i];
     }
   }
@@ -394,7 +365,7 @@ node getSymbol(char* key) {
 
 void updateSymbolType(char* key, int type){
   int i;
-  int last;
+  int last = 0;
   int was_updated = 0; 
 
   for (i = 0; i < 100; i++){
@@ -418,13 +389,13 @@ void updateSymbolType(char* key, int type){
     }
   }
 
-  printf("id %d inserted in table with type %d\n", last, type);
+  // printf("id %d inserted in table with type %d\n", last, type);
 
 }
 
 void updateSymbol(char* key, node_value val){
   int i;
-  int last;
+  int last = 0;
   int was_updated = 0; 
 
   for (i = 0; i < 100; i++){
@@ -448,128 +419,25 @@ void updateSymbol(char* key, node_value val){
     }
   }
 
-  printf("id %d inserted in table with value %d\n", last, val);
-
+  // printf("id %d inserted in table with value %d\n", last, val);
 }
 
-/*
-int hash_func(char *key){
-    int ret = 0;
-    for (int i = 0; key[i] != '\0'; i++){
-        ret += key[i];
-    }
-    return ret;
+print_symbols(){
+  printf("Symbol's table:\n");
+  for (int i = 0; i < SYMBOLS; i++){
+      if(symbol_table[i].type > -1){
+        printf("%s: ", symbol_table[i].key);
+        if(symbol_table[i].type == INTEGER_TYPE){
+          printf("%d\n", symbol_table[i].data.int_value);
+        } else if (symbol_table[i].type == CHAR_TYPE){
+          printf("%c\n", symbol_table[i].data.char_value);
+        } else if (symbol_table[i].type == BOOL_TYPE){
+          printf("%d\n", symbol_table[i].data.int_value);
+        } else if (symbol_table[i].type == REAL_TYPE){
+          printf("%f\n", symbol_table[i].data.real_value);
+        } else {
+          printf("null\n");
+        }
+      }
+  }
 }
-
-char comp_func(char *k1, char *k2){
-    return !strcmp(k1,k2);
-}
-
-int hash_map_get_index(hashmap h, char *key)
-{
-    return hash_func(key) % h->_arr_len;
-}
-
-list new_list()
-{
-    list item = malloc(sizeof(node));
-    item->next = item->key = 0;
-    return item;
-}
-
-char list_add(hashmap h, list item, char *key, node_value value)
-{
-    if (!item->key)
-    {
-        item->data = value;
-        item->key = key;
-        return 1;
-    }
-    if (comp_func(key, item->key))
-    {
-        item->data = value;
-        return;
-    }
-    if (!item->next){
-        item->next = new_list();
-    }
-
-    return list_add(h, item->next, key, value);
-}
-
-void put(hashmap h,  char *key, node_value value)
-{
-    int index = hash_map_get_index(h, key);
-    list_add(h, h->l[index], key, value);
-}
-
-void assign(char *key, node_value value){
-  printf("here");
-  put(map,key,value);
-}
-
-list list_get(hashmap h, list item, char *key)
-{
-
-    if (!item->key)
-    {
-        return 0;
-    }
-    if (comp_func(key, item->key))
-        return item;
-    if (!item->next)
-        return 0;
-
-    return list_get(h, item->next, key);
-}
-
-list hashmap_get_item(hashmap h, char *key){
-    unsigned index = hash_map_get_index(h, key);
-    return list_get(h, h->l[index], key);
-}
-
-hashmap new_hashmap(int arr_size)
-{
-    hashmap h = malloc(sizeof(struct hashmap));
-    h->l = malloc(arr_size * sizeof(list));
-    h->_arr_len = arr_size;
-    for (size_t i = 0; i < arr_size; i++)
-    {
-        h->l[i] = new_list();
-    }
-    return h;
-}
-
-hash_ret get(hashmap h, char *key)
-{
-    hash_ret ret;
-    ret.valid = 0;
-    const list item = hashmap_get_item(h, key);
-    if (item == 0){
-        return ret;
-    }
-    ret.value = item->data;
-    ret.valid = 1;
-    return ret;
-}
-
-void list_delete(list item)
-{
-    if (item->next)
-    {
-        list_delete(item->next);
-    }
-    free(item);
-}
-
-void hashmap_delete(hashmap h)
-{
-    for (size_t i = 0; i < h->_arr_len; i++)
-    {
-        list cur = h->l[i];
-        list_delete(cur);
-    }
-    free(h->l);
-    free(h);
-}
-*/
