@@ -10,12 +10,13 @@ typedef node *list;
 typedef union node_value node_value;
 
 union node_value {
-    int int_value;
-    float float_value;
-    char char_value;
+  int int_value;
+  float real_value;
+  char char_value;
 };
 
 struct node {
+  int type;
   node_value data;
   char key[100];
 };
@@ -23,6 +24,9 @@ struct node {
 node symbol_table[100];
 
 void updateSymbol(char* key, node_value);
+node getSymbol(char* key);
+char id_buffer[100][10]; // Variable names are limited to 10 characters
+int buffer_idx = 0;
 
 /*struct node
 {
@@ -62,16 +66,16 @@ void yyerror(const char *str)
 %}
 
 /* tokens mapping */
-%union {int num_val; char char_val; char* id; char* op;}
+%union {int num_val; char char_val; char* id; char* op; int type;}
 
 %token PROGRAM
 
 %token END_TOKEN
 
-%token <op> CHAR_TYPE
-%token <op> BOOL_TYPE
-%token <op> REAL_TYPE
-%token <op> INTEGER_TYPE
+%token <type> CHAR_TYPE
+%token <type> BOOL_TYPE
+%token <type> REAL_TYPE
+%token <type> INTEGER_TYPE
 
 %token <num_val> CONST
 %token <char_val> CHAR_CONST
@@ -112,8 +116,7 @@ void yyerror(const char *str)
 
 /* non-terminal types */
 %type <id> assign_stmt
-%type <num_val> type_num
-%type <char_val> type_char
+%type <num_val> type
 %type <id> ident_list
 %type <id> label
 %type <num_val> expr
@@ -127,7 +130,7 @@ void yyerror(const char *str)
 %type <num_val> factor
 %type <num_val> function_ref
 %type <id> variable
-%type <op> simple_variable_or_proc
+%type <num_val> simple_variable_or_proc
 %type <num_val> constant
 %type <char_val> boolean_constant 
 
@@ -139,17 +142,35 @@ program:                    PROGRAM IDENTIFIER SEMICOLON decl_list compound_stmt
 decl_list:                  decl_list SEMICOLON decl { ; }
                             | decl { ; }
                             ;
-decl:                       ident_list COLON type_num { ; }
-                            | ident_list COLON type_char { ; }
+decl:                       ident_list COLON type {
+                              int i;
+                              
+                              for (i = 0; i < buffer_idx; i++) {
+                                updateSymbolType(id_buffer[i], $3);
+                                printf("In buffer: %s\n", id_buffer[i]);
+                              }
+                            }
                             ;
-ident_list:                 ident_list COMMA IDENTIFIER { ; }
-                            | IDENTIFIER { $$ = $1; }
+ident_list:                 ident_list COMMA IDENTIFIER {
+                              if (buffer_idx == 0) {
+                                strcpy(id_buffer[buffer_idx], $1);
+                                buffer_idx++;
+                                strcpy(id_buffer[buffer_idx], $3);
+                              } else {
+                                strcpy(id_buffer[buffer_idx], $3);
+                              } 
+                              buffer_idx++;
+                            }
+                            | IDENTIFIER {
+                              strcpy(id_buffer[buffer_idx], $1);
+                              buffer_idx++;
+                              $$ = $1;
+                            }
                             ;
-type_num:                   INTEGER_TYPE { $$ = $1; }
+type:                       INTEGER_TYPE { $$ = $1; }
                             | REAL_TYPE { $$ = $1; }
                             | BOOL_TYPE { $$ = $1; }
-                            ;
-type_char:                  CHAR_TYPE { $$ = $1; }
+                            | CHAR_TYPE { $$ = $1; }
                             ;
 compound_stmt:              BEGIN_TOKEN stmt_list END_TOKEN { ; }
                             ;
@@ -210,12 +231,14 @@ expr:                       simple_expr { $$ = $1; }
                             ;
 simple_expr:                term { $$ = $1; }
                             | simple_expr ADDOP term {
-                              printf("ADDOP");
                               if (strcmp($2, "+") == 0){
                                 $$ = $1 + $3;
+                                printf("%d + %d: %d\n", $1, $3, $$);
                               } else if (strcmp($2, "-") == 0) {
+                                printf("minus");
                                 $$ = $1 - $3;
                               } else {
+                                printf("or");
                                 $$ = $1 || $3;
                               }
                             }
@@ -242,7 +265,7 @@ factor_a:                   SIGN factor  {
                             } /* factora != fatora */
                             | factor { $$ = $1; }
                             ;
-factor:                     constant { $$ = $1; } /* removed IDENTIFIER (in function_ref already) */
+factor:                     constant { $$ = $1; }
                             | OPEN_P expr CLOSE_P { $$ = $2; }
                             | function_ref { $$ = $1; }
                             | NOT_TOKEN factor { $$ = $2; }
@@ -274,11 +297,51 @@ function_ref:               variable OPEN_P simple_expr CLOSE_P {
                                 /* $$ = eoln($3); */
                               }                            
                             }
+                            | IDENTIFIER {
+                              node n;
+                              n = getSymbol($1);
+                              if (n.type == -1) {
+                                // Symbol not found
+                                printf("Symbol not found: %s", $1);
+                              } else {
+                                if (n.type == INTEGER_TYPE || n.type == BOOL_TYPE) {
+                                  printf("\nint or bool\n");
+                                  $$ = n.data.int_value;
+                                } else if (n.type == REAL_TYPE) {
+                                  printf("\nreal\n");
+                                  // REAL
+                                  $$ = n.data.real_value;
+                                } else if (n.type == CHAR_TYPE) {
+                                  printf("\nchar\n");
+                                  // CHAR
+                                  $$ = n.data.char_value;
+                                }
+                              }
+                            }
                             ;
 variable:                   simple_variable_or_proc { $$ = $1; }
                             | FUNC { $$ = $1; }
                             ;
-simple_variable_or_proc:    IDENTIFIER { $$ = $1; }
+simple_variable_or_proc:    IDENTIFIER {
+                              node n = getSymbol($1);
+                              if (n.type == -1) {
+                                // Symbol not found
+                                printf("Symbol not found: %s", $1);
+                              } else {
+                                if (n.type == INTEGER_TYPE || n.type == BOOL_TYPE) {
+                                  printf("\nint or bool\n");
+                                  $$ = n.data.int_value;
+                                } else if (n.type == REAL_TYPE) {
+                                  printf("\nreal\n");
+                                  // REAL
+                                  $$ = n.data.real_value;
+                                } else if (n.type == CHAR_TYPE) {
+                                  printf("\nchar\n");
+                                  // CHAR
+                                  $$ = n.data.char_value;
+                                }
+                              }
+                            }
                             ;
 constant:                   CONST  { $$ = $1; }
                             | CHAR_CONST { $$ = $1; }
@@ -297,6 +360,7 @@ int main(int argc, char *argv[]) {
   // Initializes empty symbol_table
   for (i = 0; i < 100; i++){
     strcpy(symbol_table[i].key, "none");
+    symbol_table[i].type = -1;
   }
 
   // map = new_hashmap(100);
@@ -309,6 +373,54 @@ int main(int argc, char *argv[]) {
 
   return 0;
 } 
+
+node getSymbol(char* key) {
+  int i;
+  node n;
+  n.type = -1;
+
+  for (i = 0; i < 100; i++){
+    
+    if (strcmp(symbol_table[i].key, key) == 0){
+      printf("\nSYMBOL FOUND! i = %d\nSymbol val: %d\nSymbol type: %d\n\n", i, symbol_table[i].data, symbol_table[i].type);
+      return symbol_table[i];
+    }
+  }
+
+  printf("Variable not found");
+  return n;
+  
+}
+
+void updateSymbolType(char* key, int type){
+  int i;
+  int last;
+  int was_updated = 0; 
+
+  for (i = 0; i < 100; i++){
+    
+    if (strcmp(symbol_table[i].key, "none") != 0){
+      last = i;
+    }
+
+    if (strcmp(symbol_table[i].key, key) == 0){
+      symbol_table[i].type = type;
+      was_updated = 1;
+    }
+  }
+
+  if (!was_updated) {
+    if (last < 99) {
+      strcpy(symbol_table[last+1].key, key);
+      symbol_table[last+1].type = type;
+    } else {
+      printf("Memoria cheia!");
+    }
+  }
+
+  printf("id %d inserted in table with type %d\n", last, type);
+
+}
 
 void updateSymbol(char* key, node_value val){
   int i;

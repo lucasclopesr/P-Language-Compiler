@@ -19,10 +19,10 @@
 (write) { return WRITE_TOKEN; }
 (goto) { return GOTO_TOKEN; }
 (NOT) { return NOT_TOKEN; }
-(integer) { return INTEGER_TYPE; }
-(real) { return REAL_TYPE; }
-(boolean) { return BOOL_TYPE; }
-(char) { return CHAR_TYPE; }
+(integer) { yylval.type = INTEGER_TYPE;  return INTEGER_TYPE; }
+(real) { yylval.type = REAL_TYPE; return REAL_TYPE; }
+(boolean) { yylval.type = BOOL_TYPE; return BOOL_TYPE; }
+(char) { yylval.type = CHAR_TYPE; return CHAR_TYPE; }
 (program) { return PROGRAM; }
 
 (\+|-|or) { yylval.op = malloc(sizeof(yytext)); strcpy(yylval.op, yytext); return ADDOP; }
@@ -43,7 +43,7 @@
 (<=|>=|<>|=|<|>) { yylval.op = malloc(sizeof(yytext)); strcpy(yylval.op, yytext); return RELOP; }
 (;|[ ];) { return SEMICOLON; }
 : { return COLON; }
-(,|[ ],) { return COMMA; }
+(,|[ ],) { yylval.op = malloc(sizeof(yytext)); strcpy(yylval.op, yytext); return COMMA; }
 (:=|[ ]:=) { return ASSIGN; }
 [(] { return OPEN_P; }
 [)] { return CLOSE_P; }
